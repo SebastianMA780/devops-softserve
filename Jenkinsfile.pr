@@ -1,7 +1,12 @@
 pipeline {
     agent any // Define agent at the top level if not already
-
-
+    
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch name to checkout')
+        string(name: 'CHANGE_ID', defaultValue: '', description: 'Pull Request ID')
+        string(name: 'CHANGE_URL', defaultValue: '', description: 'Pull Request URL')
+    }
+    
     environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')

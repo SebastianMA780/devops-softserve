@@ -11,10 +11,13 @@ pipeline {
 			success {
 				script {
 					echo 'Triggering PR validation pipeline...'
-					build job: "Terraform-PR-Pipeline/${env.BRANCH_NAME}",
+					build job: "Terraform-PR-Pipeline",
 						wait: false,
-						parameters: [],
-						propagateParameters: true,
+						parameters: [
+							string(name: 'BRANCH_NAME', value: "${env.BRANCH_NAME}"),
+							string(name: 'CHANGE_ID', value: "${env.CHANGE_ID ?: ''}"),
+							string(name: 'CHANGE_URL', value: "${env.CHANGE_URL ?: ''}") 
+						],
 						propagate: true
 				}
 			}
