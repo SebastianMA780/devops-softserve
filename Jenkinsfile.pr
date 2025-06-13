@@ -28,13 +28,20 @@ pipeline {
                     echo "Change ID: ${params.CHANGE_ID}"
                     echo "Change URL: ${params.CHANGE_URL}"
                     
+                    // Format branch name correctly for PRs
+                    def branchSpec = params.BRANCH_NAME
+                    if (params.BRANCH_NAME.startsWith('PR-')) {
+                        branchSpec = "refs/pull/${params.CHANGE_ID}/head"
+                        echo "Using PR reference: ${branchSpec}"
+                    }
+                    
                     // Explicitly checkout the desired branch/PR
                     checkout([$class: 'GitSCM', 
-                        branches: [[name: params.BRANCH_NAME]], 
+                        branches: [[name: branchSpec]], 
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [], 
                         submoduleCfg: [], 
-                        userRemoteConfigs: [[credentialsId: 'github-token', url: scm.getUserRemoteConfigs()[0].getUrl()]]
+                        userRemoteConfigs: [[credentialsId: 'Webhook-Token', url: scm.getUserRemoteConfigs()[0].getUrl()]]
                     ])
                 }
             }
