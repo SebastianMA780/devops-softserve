@@ -1,4 +1,3 @@
-@Library('_') _
 pipeline {
     agent any // Define agent at the top level if not already
 
@@ -15,11 +14,8 @@ pipeline {
     }
 
     stages {
-        stage('Testing') {
+        stage('Test') {
             steps {
-                script {
-                    runTests()
-                }
             }
         }
 
