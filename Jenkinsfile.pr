@@ -20,6 +20,25 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    // Print debug information
+                    echo "Checking out branch: ${params.BRANCH_NAME}"
+                    echo "Change ID: ${params.CHANGE_ID}"
+                    echo "Change URL: ${params.CHANGE_URL}"
+                    
+                    // Explicitly checkout the desired branch/PR
+                    checkout([$class: 'GitSCM', 
+                        branches: [[name: params.BRANCH_NAME]], 
+                        doGenerateSubmoduleConfigurations: false, 
+                        extensions: [], 
+                        submoduleCfg: [], 
+                        userRemoteConfigs: [[credentialsId: 'github-token', url: scm.getUserRemoteConfigs()[0].getUrl()]]
+                    ])
+                }
+            }
+        }
 
         stage('Initialize Terraform') {
             steps {
