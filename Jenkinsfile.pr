@@ -1,6 +1,12 @@
 pipeline {
-    agent any
-
+    agent any // Define agent at the top level if not already
+    
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch name to checkout')
+        string(name: 'CHANGE_ID', defaultValue: '', description: 'Pull Request ID')
+        string(name: 'CHANGE_URL', defaultValue: '', description: 'Pull Request URL')
+    }
+    
     environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
@@ -14,6 +20,26 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    // Print debug information
+                    echo "Checking out branch: ${params.BRANCH_NAME}"
+                    echo "Change ID: ${params.CHANGE_ID}"
+                    echo "Change URL: ${params.CHANGE_URL}"
+                    
+                    // Explicitly checkout the desired branch/PR
+                    checkout([$class: 'GitSCM', 
+                        branches: [[name: params.BRANCH_NAME]], 
+                        doGenerateSubmoduleConfigurations: false, 
+                        extensions: [], 
+                        submoduleCfg: [], 
+                        userRemoteConfigs: [[credentialsId: 'github-token', url: scm.getUserRemoteConfigs()[0].getUrl()]]
+                    ])
+                }
+            }
+        }
+
         stage('Initialize Terraform') {
             steps {
                 dir('infra') {
@@ -40,24 +66,24 @@ pipeline {
 
         stage('Publish Plan to Gist and Comment on PR') {
             when {
-                expression { env.CHANGE_ID != null && env.CHANGE_URL != null }
+                expression { params.CHANGE_ID != null && params.CHANGE_ID != '' && params.CHANGE_URL != null && params.CHANGE_URL != '' }
             }
             steps {
                 script {
                     def githubOwner = ''
                     def githubRepo = ''
                     
-                    if (env.CHANGE_URL) {
-                        def matcher = (env.CHANGE_URL =~ /github\.com\/([^\/]+)\/([^\/]+)\/pull\/\d+/)
+                    if (params.CHANGE_URL) {
+                        def matcher = (params.CHANGE_URL =~ /github\.com\/([^\/]+)\/([^\/]+)\/pull\/\d+/)
                         if (matcher.find()) {
                             githubOwner = matcher[0][1]
                             githubRepo = matcher[0][2]
                             echo "GitHub Owner: ${githubOwner}, GitHub Repo: ${githubRepo}"
                         } else {
-                            error "Could not extract owner/repository from CHANGE_URL: ${env.CHANGE_URL}"
+                            error "Could not extract owner/repository from CHANGE_URL: ${params.CHANGE_URL}"
                         }
                     } else {
-                        error "CHANGE_URL environment variable not found. Cannot determine GitHub repository."
+                        error "CHANGE_URL parameter not found or empty. Cannot determine GitHub repository."
                     }
 
                     unstash 'terraform-plan-pr'
