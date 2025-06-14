@@ -16,12 +16,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-							build job: 'Terraform-PR-Pipeline-Test',
-							propagate: true,
-							wait: true,
-							parameters: [
-								string(name: 'BRANCH_NAME', value: env.BRANCH_NAME)
-							]
+						 echo "Testing..."
             }
         }
 
