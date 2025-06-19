@@ -149,5 +149,21 @@ pipeline {
             sh 'rm -f gist_payload.json comment_payload.json || echo "No temporary payload files to clean up"'
             cleanWs()
         }
+				success {
+						sh """
+								curl -H "Content-Type: application/json" \
+										-X POST \
+										-d '{"content": "✅ Pipeline SUCCESS: ${env.JOB_NAME} [#${env.BUILD_NUMBER}] - ${env.BUILD_URL}"}' \
+										https://discord.com/api/webhooks/1385368107328999565/MVQIwxRjdccYIP8LKmjoWSHSScyysFmjMygyb8E1HiJoLGSJS94hEHirLWAtNxHJQpVT
+						"""
+				}
+				failure {
+						sh """
+								curl -H "Content-Type: application/json" \
+										-X POST \
+										-d '{"content": "❌ Pipeline FAILED: ${env.JOB_NAME} [#${env.BUILD_NUMBER}] - ${env.BUILD_URL}"}' \
+										https://discord.com/api/webhooks/1385368107328999565/MVQIwxRjdccYIP8LKmjoWSHSScyysFmjMygyb8E1HiJoLGSJS94hEHirLWAtNxHJQpVT
+						"""
+				}
     }
 }
