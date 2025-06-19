@@ -9,10 +9,6 @@ pipeline {
         GITHUB_PAT            = credentials('github-token') 
     }
 
-    tools {
-        terraform 'terraform'
-    }
-
     stages {
         stage('Test') {
             steps {
