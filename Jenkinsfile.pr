@@ -1,10 +1,5 @@
 pipeline {
-    agent any // Define agent at the top level if not already
-		parameters {
-			string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch name to checkout')
-			string(name: 'CHANGE_ID', defaultValue: '', description: 'Pull Request ID')
-			string(name: 'CHANGE_URL', defaultValue: '', description: 'Pull Request URL')
-		}
+    agent any
 
     environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
@@ -14,16 +9,18 @@ pipeline {
         GITHUB_PAT            = credentials('github-token') 
     }
 
-    tools {
-        terraform 'terraform'
-    }
-
     stages {
-				stage('Log Parameters') {
+        stage('Test') {
+            steps {
+						 echo "Testing..."
+            }
+        }
+
+				stage('Log Environment') {
 					steps {
-						echo "BRANCH_NAME: ${params.BRANCH_NAME}"
-						echo "CHANGE_ID: ${params.CHANGE_ID}"
-						echo "CHANGE_URL: ${params.CHANGE_URL}"
+						echo "BRANCH_NAME: ${env.BRANCH_NAME}"
+						echo "CHANGE_ID: ${env.CHANGE_ID}"
+						echo "CHANGE_URL: ${env.CHANGE_URL}"
 					}
 				}
 
